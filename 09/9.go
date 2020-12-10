@@ -64,6 +64,26 @@ func addRange(numbers []int, answer int) ([]int, error) {
 	return nil, errors.New("No answer")
 }
 
+func linearRange(numbers []int, answer int) ([]int, error) {
+	var a, b int
+	b = 1
+	sum := numbers[0]
+	for b < len(numbers) {
+		sum += numbers[b]
+		b += 1
+
+		for sum > answer {
+			sum -= numbers[a]
+			a += 1
+		}
+
+		if sum == answer {
+			return numbers[a:b], nil
+		}
+	}
+	return nil, errors.New("No answer")
+}
+
 func part2(window []int) int {
 	min := window[0]
 	max := window[0]
@@ -89,18 +109,26 @@ func main() {
 		log.Fatal(err)
 	}
 
-	answer, err := part1(numbers)
+	p1answer, err := part1(numbers)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	fmt.Println("P1:", answer)
+	fmt.Println("P1:", p1answer)
 
-	rng, err := addRange(numbers, answer)
+	rng, err := addRange(numbers, p1answer)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	answer := part2(rng)
+	fmt.Println("P2:", answer)
+
+	rng, err = linearRange(numbers, p1answer)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	answer = part2(rng)
-	fmt.Println("P2:", answer)
+	fmt.Println("L2:", answer)
 }
