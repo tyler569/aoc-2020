@@ -187,7 +187,7 @@ const p1 = `
 `
 
 func part1() {
-	b = parse(p1)
+	b := parse(p1)
 	for i := 0; i < 6; i++ {
 		b = b.iterate()
 	}
@@ -195,7 +195,7 @@ func part1() {
 }
 
 func part2() {
-	b4 = parse4(p1)
+	b4 := parse4(p1)
 	for i := 0; i < 6; i++ {
 		b4 = b4.iterate()
 	}
