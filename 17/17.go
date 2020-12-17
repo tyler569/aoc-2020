@@ -186,28 +186,24 @@ const p1 = `
 #...#.#.
 `
 
-func main() {
-	b := parse(example)
-	for i := 0; i < 6; i++ {
-		b = b.iterate()
-	}
-	fmt.Println("example:", b.count())
-
+func part1() {
 	b = parse(p1)
 	for i := 0; i < 6; i++ {
 		b = b.iterate()
 	}
 	fmt.Println("P1:", b.count())
+}
 
-	b4 := parse4(example)
-	for i := 0; i < 6; i++ {
-		b4 = b4.iterate()
-	}
-	fmt.Println("example4:", b4.count())
-
+func part2() {
 	b4 = parse4(p1)
 	for i := 0; i < 6; i++ {
 		b4 = b4.iterate()
 	}
 	fmt.Println("P2:", b4.count())
+}
+
+
+func main() {
+	part1()
+	part2()
 }
