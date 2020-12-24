@@ -95,10 +95,9 @@ def iterate(floor)
   end
 end
 
-puts "0: #{count_black(floor)}"
-
 for i in (1..100)
   floor = iterate(floor)
-  puts "#{i}: #{count_black(floor)}"
 end
+
+puts "P2: #{count_black(floor)}"
 
