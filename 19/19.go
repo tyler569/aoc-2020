@@ -9,12 +9,10 @@ import (
 	"strings"
 )
 
-var file = flag.String("file", "input", "The file")
+var input = flag.String("input", "input", "Input file")
 
-func main() {
-	flag.Parse()
-
-	content, err := ioutil.ReadFile(*file)
+func readInput(file string) (rules []string, examples []string) {
+	content, err := ioutil.ReadFile(file)
 	if err != nil {
 		fatalf("%v\n", err)
 	}
@@ -23,13 +21,15 @@ func main() {
 	allrules := sp[0]
 	allexamples := sp[1]
 
-	rules := strings.Split(allrules, "\n")
-	examples := strings.Split(allexamples, "\n")
+	rules = strings.Split(allrules, "\n")
+	examples = strings.Split(allexamples, "\n")
+	return
+}
 
+func main() {
+	flag.Parse()
+	rules, examples := readInput(*input)
 	ruleSet := parseRules(rules)
-	for k, v := range ruleSet {
-		fmt.Println(k, v)
-	}
 
 	total := 0
 	for _, message := range examples {
@@ -37,15 +37,7 @@ func main() {
 			total++
 		}
 	}
-	fmt.Println("P1:", total)
-
-	total = 0
-	for _, message := range examples {
-		if match(message, ruleSet) {
-			total++
-		}
-	}
-	fmt.Println("P2:", total)
+	fmt.Println("P_:", total)
 }
 
 type rule struct {
@@ -85,45 +77,69 @@ func parseAlternatives(ruleText string) [][]int {
 	return res
 }
 
-func matchRule(s string, ruleSet map[int]rule, rule int) (bool, string) {
+func matchRule(s string, ruleSet map[int]rule, rule int) (bool, []string) {
 	// fmt.Printf("matchRule(%v, ruleSet, %v)\n", s, rule)
+	var allRests []string
+
 	if len(s) == 0 {
-		return false, s
+		allRests = append(allRests, "")
+		return false, allRests
 	}
 
 	r := ruleSet[rule]
 	if r.letter != 0 {
 		if len(s) > 1 {
-			return s[0] == r.letter, s[1:]
+			allRests = append(allRests, s[1:])
+			return s[0] == r.letter, allRests
 		} else {
-			return s[0] == r.letter, ""
+			allRests = append(allRests, "")
+			return s[0] == r.letter, allRests
 		}
 	}
 
+	anyMatch := false
 	for _, alternative := range r.alternatives {
-		hit := true
-		sCopy := s
+		// altRests := []string{}
+		ruleRestAcc := []string{s}
+		altMatch := true
 		for _, ruleNum := range alternative {
-			match, rest := matchRule(sCopy, ruleSet, ruleNum)
-			if !match {
-				hit = false
+			ruleRestThis := []string{}
+			anySubMatch := false
+			for _, rr := range ruleRestAcc {
+				match, rs := matchRule(rr, ruleSet, ruleNum)
+				if match {
+					anySubMatch = true
+					ruleRestThis = append(ruleRestThis, rs...)
+				}
+			}
+			if !anySubMatch {
+				altMatch = false
 				break
 			}
-			sCopy = rest
+			ruleRestAcc = ruleRestThis
 		}
-		if hit {
-			return true, sCopy
+		if altMatch {
+			allRests = append(allRests, ruleRestAcc...)
+			anyMatch = true
 		}
 	}
-	return false, s
+
+	fmt.Printf("matchRule(%v, ...) -> %v %v\n", s, anyMatch, allRests)
+	return anyMatch, allRests
 }
 
 func match(s string, ruleSet map[int]rule) bool {
 	ok, rest := matchRule(s, ruleSet, 0)
-	if len(rest) > 0 {
-		return false
+	exact := false
+	for _, r := range rest {
+		if len(r) == 0 {
+			exact = true
+		}
 	}
-	return ok
+	if len(rest) == 0 {
+		exact = true
+	}
+	return ok && exact
 }
 
 func atoi(s string) int {
